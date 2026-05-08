@@ -150,6 +150,29 @@ Cieľ: `notify.mobile_app_iphone_uzivatela_david` (David's iPhone cez HA Compani
 
 `/home/user/smart/` – samostatná PWA (Node.js/Express, port 3000) – osobný systém (Planner, kanban, atď.). Nie je súčasťou HA, ale beží na tom istom serveri.
 
+## Monitoring
+
+### Beszel
+- Config dir: `/home/user/stacks/monitoring/`
+- Compose: `/home/user/stacks/monitoring/compose.yaml`
+- Hub: `http://smart-home-pc:8090` (`network_mode: host`)
+- Agent: `localhost:45876` (`network_mode: host`, sleduje Docker + systém)
+- Key: v `/home/user/stacks/monitoring/.env` ako `BESZEL_KEY`
+
+```bash
+# Reštart
+cd /home/user/stacks/monitoring && docker compose restart
+
+# Logy
+docker logs beszel -f --tail 50
+docker logs beszel-agent -f --tail 50
+
+# Aktualizácia
+cd /home/user/stacks/monitoring && docker compose pull && docker compose up -d
+```
+
+**Gotcha:** Oba kontajnery musia byť `network_mode: host` — inak hub nedosiahne agenta cez `localhost:45876`.
+
 ## Timezone
 
 Server a HA kontajnery: `Europe/Berlin` (= Europe/Prague/Bratislava, UTC+1/+2)
