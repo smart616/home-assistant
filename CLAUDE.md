@@ -5,7 +5,9 @@ Dokumentácia, konfigurácia a údržba Home Assistant na serveri `smart-home-pc
 ## Server
 
 - **Host:** `smart-home-pc` (SSH, key auth, user: `user`)
-- **OS:** Ubuntu 24.04, x86_64
+- **Hardvér:** MacBook Air 2013 (Haswell, Intel HD 5000) — detaily v `HOMELAB.md`
+- **OS:** Linux Mint 22.3, x86_64
+- **LAN IP:** `192.168.0.219`
 - **Stack dir:** `/home/user/homeassistant/`
 
 ## Stack (Docker Compose)
@@ -172,6 +174,76 @@ cd /home/user/stacks/monitoring && docker compose pull && docker compose up -d
 ```
 
 **Gotcha:** Oba kontajnery musia byť `network_mode: host` — inak hub nedosiahne agenta cez `localhost:45876`.
+
+## AdGuard Home
+
+- **Compose:** `/opt/stacks/adguardhome/compose.yaml`
+- **Web UI:** `http://smart-home-pc:3002`
+- **DNS port:** 53 (host network)
+- **Data:** `/opt/stacks/adguardhome/workdir` + `confdir`
+- **Router DNS:** `192.168.0.219` (primárny, žiadny sekundárny — inak zariadenia obídu AGH)
+- **Upstream DNS:** `https://family.cloudflare-dns.com/dns-query` (blokuje malware + dospelý obsah)
+
+### UFW porty (potrebné pre DNS)
+```bash
+sudo ufw allow 53/tcp
+sudo ufw allow 53/udp
+```
+
+### Blocklisty
+```
+https://big.oisd.nl/
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/tif.txt
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/popupads.txt
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/fake.txt
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/nsfw.txt
+https://nsfw.oisd.nl/domainswild2
+```
+
+**Max list:** Hagezi Multi PRO. **NIKDY** PRO++/Ultimate — rozbije slovenské bankové appky.
+
+### Operácie
+```bash
+cd /opt/stacks/adguardhome && docker compose restart
+docker logs adguardhome -f --tail 50
+cd /opt/stacks/adguardhome && docker compose pull && docker compose up -d
+```
+
+### Gotcha: systemd-resolved konflikt
+`systemd-resolved` drží `127.0.0.53:53` štandardne. Fix v `/etc/systemd/resolved.conf.d/adguardhome.conf`:
+```ini
+[Resolve]
+DNSStubListener=no
+DNS=1.1.1.1 9.9.9.9
+```
++ `sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf` + restart resolved.
+
+## Immich
+
+- **Compose:** `/opt/stacks/immich/compose.yaml`
+- **Web UI:** `http://smart-home-pc:2283`
+- **Upload dir:** `/opt/stacks/immich/library/` (presun na `/mnt/media/immich/library/` keď príde USB HDD)
+- **External library:** `/home/user/Photos` → `/usr/src/app/external` (read-only mount, import manuálne)
+- **ML:** vypnuté (3.8 GB RAM) — odkomentovať `immich-machine-learning` v compose.yaml keď príde väčší stroj
+- **Verzia:** Immich v2.7.5
+
+```bash
+# Logy
+docker logs immich-server -f --tail 50
+
+# Aktualizácia (pg_dump PRED pulom!)
+docker exec immich-postgres pg_dump -U immich immich > /opt/stacks/immich/backup-$(date +%F).sql
+cd /opt/stacks/immich && docker compose pull && docker compose up -d
+```
+
+### Gotcha: DB_HOSTNAME
+Immich defaultne hľadá postgres na hostnamu `database`. Keďže naša služba sa volá `immich-postgres`, treba `DB_HOSTNAME=immich-postgres` v `.env`.
+
+### Presun na USB HDD (keď príde)
+1. `docker compose stop immich-server`
+2. `rsync -av /opt/stacks/immich/library/ /mnt/media/immich/library/`
+3. Zmeň `.env`: `UPLOAD_LOCATION=/mnt/media/immich/library`
+4. `docker compose up -d`
 
 ## Timezone
 
