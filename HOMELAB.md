@@ -214,7 +214,34 @@ NEZÁLOHUJ médiá (cez *arr re-downloadable).
 ### Restore test
 Štvrťročne — `restic restore latest --target /tmp/restore-test`
 
-## 13. Pravidlá pre Claude Code
+## 13. Monitoring a alerting
+
+### Beszel
+- UI: `http://smart-home-pc:8090` — grafy CPU, RAM, disk, Docker kontajnery
+- Agent sleduje `/mnt/immich` cez `EXTRA_FILESYSTEMS=/mnt/immich`
+- Beszel alerting **nepoužívame** — nahradený vlastným skriptom (viď nižšie)
+
+### Homepage disk widgety
+- `/` — hlavný disk
+- `/mnt/immich` — Immich SSD
+
+### Health check skript
+**Skript:** `/opt/stacks/backup/check-health.sh`
+**Cron:** `0 * * * *` (každú hodinu, root crontab)
+**Log:** `/var/log/check-health.log`
+
+Kontroluje:
+| Check | Prah | Akcia |
+|---|---|---|
+| Disk `/` | > 85% | HA webhook → iPhone notifikácia |
+| Disk `/mnt/immich` | > 85% | HA webhook → iPhone notifikácia |
+| RAM | > 90% | HA webhook → iPhone notifikácia |
+| SMART `/dev/sda` (Apple SSD, systém) | FAILED | HA webhook → iPhone notifikácia |
+| SMART `/dev/sdc` (ADATA SU800, Immich) | FAILED | HA webhook → iPhone notifikácia |
+
+**HA automation:** `beszel_alert_webhook` — webhook ID `beszel_alert`, posiela na `notify.mobile_app_iphone_uzivatela_david`
+
+## 14. Pravidlá pre Claude Code
 
 - Pred zmenami v compose: over `.env.example` existuje + `.env` v `.gitignore`.
 - Pred `docker compose down` na live stacku: navrhni zálohu volumes.
@@ -225,7 +252,7 @@ NEZÁLOHUJ médiá (cez *arr re-downloadable).
 - Immich upgrade: najprv `pg_dump`, potom `docker compose pull && up -d`. v2.x dodržuje semver.
 - Slovenský VAT: Hetzner/Tailscale → reverse charge, VIES check OK.
 
-## 14. Migrácia keď MacBook umrie
+## 15. Migrácia keď MacBook umrie
 
 1. N100 mini-PC (~150 €) + Debian/Ubuntu Server.
 2. `git clone` repo s `/opt/stacks`.
@@ -238,4 +265,4 @@ Cieľ: < 1 hodina migrácia.
 
 ---
 
-**Last updated**: 2026-05-10
+**Last updated**: 2026-05-10 (monitoring + alerting sekcia pridaná)
