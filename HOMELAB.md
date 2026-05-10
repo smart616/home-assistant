@@ -202,17 +202,24 @@ Max: Hagezi Multi PRO. **NIKDY** PRO++/Ultimate.
 ### Čo sa zálohuje
 - `/opt/stacks/` — compose súbory + appdata
 - `/home/user/homeassistant/` — HA config, Z2M, Mosquitto, ESPHome (bez `.esphome` build cache)
+- `/home/user/stacks/` — Beszel DB + Homepage config
+- `/home/user/smart/` — Smart PWA zdrojový kód (bez `node_modules`)
+- `/home/user/.ssh/` — SSH kľúče (potrebné po restore pre prístup na Storage Box)
 - `/mnt/immich/library/` — Immich fotky/videá
 - `/var/lib/docker/volumes/smart_smart-data/_data` — Smart PWA dáta
+- `/var/lib/docker/volumes/docker_smart-data/_data` — Smart PWA SQLite DB
 - `pg_dump immich` → `/opt/stacks/backup/dumps/immich-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
+- System config snapshot → `/opt/stacks/backup/dumps/sysconfig/` (DNS, Docker, crontab, UFW)
 
 NEZÁLOHUJ médiá (cez *arr re-downloadable).
 
 ### Retention
 7 denných / 4 týždenných / 6 mesačných snapshotov, automatický prune.
 
-### Restore test
-Štvrťročne — `restic restore latest --target /tmp/restore-test`
+### Restore
+Návod: `/opt/stacks/backup/RESTORE.md` (zálohovaný spolu so stackom)
+
+Štvrťročný test: `restic restore latest --target /tmp/restore-test`
 
 ## 13. Monitoring a alerting
 
@@ -265,4 +272,4 @@ Cieľ: < 1 hodina migrácia.
 
 ---
 
-**Last updated**: 2026-05-10 (monitoring + alerting sekcia pridaná)
+**Last updated**: 2026-05-10
