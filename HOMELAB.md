@@ -223,6 +223,7 @@ docker logs seafile -f
 - iOS Files.app WebDAV: použiť **App Password** (vygenerovaný v Seafile web UI → Settings → App Password), nie hlavné heslo.
 - `.env` heslá: **nepoužívať `#`** (Docker Compose to číta ako komentár). Citovať hodnoty s `"`.
 - `JWT_PRIVATE_KEY` povinný v env od v12 — bez neho server nenaštartuje.
+- `SERVICE_URL` + `FILE_SERVER_ROOT` musia byť `https://` (nie `http://`) — inak iOS app nevie sťahovať súbory. Súbor: `/shared/seafile/conf/seahub_settings.py`.
 - Pri zabudnutom hesle: `printf "email\nnewpass\nnewpass\n" | ./reset-admin.sh` v kontajneri (`/opt/seafile/seafile-server-latest/`).
 - Login attempt counter v Memcached — reset: `echo flush_all | nc localhost 11211` v `seafile-memcached` kontajneri.
 
