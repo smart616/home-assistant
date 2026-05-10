@@ -222,7 +222,7 @@ DNS=1.1.1.1 9.9.9.9
 
 - **Compose:** `/opt/stacks/immich/compose.yaml`
 - **Web UI:** `http://smart-home-pc:2283`
-- **Upload dir:** `/opt/stacks/immich/library/` (presun na `/mnt/media/immich/library/` keď príde USB HDD)
+- **Upload dir:** `/mnt/immich/library/` (btrfs SSD, 238 GB, mountnutý na `/mnt/immich`)
 - **External library:** `/home/user/Photos` → `/usr/src/app/external` (read-only mount, import manuálne)
 - **ML:** vypnuté (3.8 GB RAM) — odkomentovať `immich-machine-learning` v compose.yaml keď príde väčší stroj
 - **Verzia:** Immich v2.7.5
@@ -239,9 +239,9 @@ cd /opt/stacks/immich && docker compose pull && docker compose up -d
 ### Gotcha: DB_HOSTNAME
 Immich defaultne hľadá postgres na hostnamu `database`. Keďže naša služba sa volá `immich-postgres`, treba `DB_HOSTNAME=immich-postgres` v `.env`.
 
-### Presun na USB HDD (keď príde)
+### Presun na väčší disk (keď príde USB HDD)
 1. `docker compose stop immich-server`
-2. `rsync -av /opt/stacks/immich/library/ /mnt/media/immich/library/`
+2. `rsync -av /mnt/immich/library/ /mnt/media/immich/library/`
 3. Zmeň `.env`: `UPLOAD_LOCATION=/mnt/media/immich/library`
 4. `docker compose up -d`
 
