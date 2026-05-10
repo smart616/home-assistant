@@ -11,7 +11,7 @@
 - **VPN overlay**: Tailscale (nainštalované, free Personal plán)
 - **Klienti**: Android TV box, HY300 projektor (Android 9/10), iPhone/Android mobily
 - **Plánovaný disk**: USB 3.0 HDD 4–8 TB pre `/mnt/media`
-- **Voliteľne**: USB SSD 500 GB pre `/opt/stacks` + Postgres volumes
+- **Pripojený disk**: ADATA SU800 256 GB SSD → `/mnt/immich` (btrfs, Immich library)
 
 ## 2. Hardvérové obmedzenia (KRITICKÉ)
 
@@ -45,6 +45,7 @@
 | All-in-one panel | NEPOUŽÍVAŤ | žiadne CasaOS/Umbrel |
 | Auto-update | NEPOUŽÍVAŤ | iba notify mode (Diun) |
 | FS na externom HDD | ext4 | NIE btrfs |
+| FS na Immich SSD | btrfs | bitrot ochrana pre fotky/videá |
 
 ## 4. Štruktúra priečinkov
 
@@ -61,7 +62,10 @@
 ├── monitoring/                 # Beszel + Homepage
 └── dockge/
 
-/mnt/media/                     # USB 3.0 HDD, ext4
+/mnt/immich/                    # ADATA SU800 256 GB SSD, btrfs, label: immich
+└── library/                    # Immich UPLOAD_LOCATION
+
+/mnt/media/                     # USB 3.0 HDD, ext4 (plánovaný)
 └── data/
     ├── torrents/{movies,tv}
     └── media/{movies,tv}
