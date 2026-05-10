@@ -36,6 +36,7 @@
 | VPN container | Gluetun | `VPN_PORT_FORWARDING=on` |
 | Media server | Jellyfin | s VAAPI |
 | Fotky | Immich v2.x | ML voliteľné podľa RAM |
+| Úložisko (Drive) | Seafile CE 12.x | náhrada Google Drive, dokumenty/general files |
 | Vzdialený prístup | Tailscale Serve | žiadny reverse proxy |
 | Monitoring | Beszel | ~50 MB RAM |
 | Uptime monitoring | Uptime Kuma | externý — Hetzner CX11 |
@@ -60,10 +61,12 @@
 ├── immich/
 ├── homeassistant/              # vlastný update cyklus
 ├── monitoring/                 # Beszel + Homepage
+├── seafile/                    # Seafile CE 12.x (Drive replacement)
 └── dockge/
 
 /mnt/immich/                    # ADATA SU800 256 GB SSD, btrfs, label: immich
-└── library/                    # Immich UPLOAD_LOCATION
+├── library/                    # Immich UPLOAD_LOCATION
+└── seafile/                    # Seafile data (/shared bind mount)
 
 /mnt/media/                     # USB 3.0 HDD, ext4 (plánovaný)
 └── data/
@@ -164,13 +167,78 @@ Tuning: swap 4 GB, `vm.swappiness=10`, Docker log rotation v `/etc/docker/daemon
 
 ## 9. Tailscale Serve
 
+**Aktuálny stav (aktívne):**
+
+| Port | Služba | Localhost |
+|---|---|---|
+| 443 | Seafile | `http://localhost:8000` |
+| 8443 | Immich | `http://localhost:2283` |
+
 ```bash
-sudo tailscale serve --bg --https 443  http://localhost:8096   # Jellyfin
-sudo tailscale serve --bg --https 8443 http://localhost:2283   # Immich
-sudo tailscale serve --bg --https 9443 http://localhost:5055   # Jellyseerr
+# Nakonfigurovať (ak sa stratí po reinstalácii TS):
+sudo tailscale serve --https 443  http://localhost:8000   # Seafile
+sudo tailscale serve --https 8443 http://localhost:2283   # Immich
+
+# Plánované (po nasadení):
+sudo tailscale serve --https 9443 http://localhost:8096   # Jellyfin
 ```
 
+**URLs:**
+- Seafile: `https://smart-home-pc.taile97bf5.ts.net`
+- Immich: `https://smart-home-pc.taile97bf5.ts.net:8443`
+
+**Gotcha:** `tailscale serve` konfigurácia sa stratí pri reinstalácii TS. Obnoviť cez príkazy vyššie.
+
 Reverse proxy pridať iba ak: smart TV bez TS klienta, path-based routing, public sharing → Caddy.
+
+## 9b. Seafile
+
+- **Compose:** `/opt/stacks/seafile/compose.yaml`
+- **Web UI:** `https://smart-home-pc.taile97bf5.ts.net` (cez Tailscale)
+- **Data:** `/mnt/immich/seafile/` (ADATA SU800 256 GB SSD, btrfs)
+- **DB:** MariaDB 11.4 (volume `seafile-db`)
+- **Port (local):** `127.0.0.1:8000` (nginx v kontajneri)
+
+### Klienti
+| Klient | Konfigurácia |
+|---|---|
+| Windows (SeaDrive 3) | Server: `https://smart-home-pc.taile97bf5.ts.net`, drive letter S: |
+| iPhone (Seafile app) | Server: `https://smart-home-pc.taile97bf5.ts.net` — camera auto-upload |
+| iOS Files.app (WebDAV) | `https://smart-home-pc.taile97bf5.ts.net/seafdav` — App Password (nie hlavné heslo!) |
+| Web | `https://smart-home-pc.taile97bf5.ts.net` |
+
+### Prvé spustenie
+```bash
+cd /opt/stacks/seafile
+cp .env.example .env  # vyplniť silné heslá
+docker compose up -d
+# Počkať ~60s na init DB a migrácie
+docker logs seafile -f
+```
+
+### Gotchas
+- `SERVICE_URL` + `FILE_SERVER_ROOT` sa nastavujú cez `SEAFILE_SERVER_HOSTNAME` pri prvom štarte — **nezmeniť neskôr bez re-init**.
+- Major upgrade (napr. 12 → 13): vždy Borg backup pred upgadom mimo bežnej rotácie.
+- Admin heslo z `.env` platí **iba pri prvom štarte**. Neskôr meniť vo web UI.
+- iOS Files.app WebDAV: použiť **App Password** (vygenerovaný v Seafile web UI → Settings → App Password), nie hlavné heslo.
+
+### Operácie
+```bash
+# Logy
+docker logs seafile -f --tail 50
+docker logs seafile-db -f --tail 50
+
+# Aktualizácia
+cd /opt/stacks/seafile && docker compose pull && docker compose down && docker compose up -d
+
+# Reštart
+cd /opt/stacks/seafile && docker compose restart
+```
+
+### Backup (integrovaný do existujúceho Restic)
+- MariaDB dump: automaticky v `/opt/stacks/backup/backup.sh` (ak `seafile-db` beží)
+- Data: `/mnt/immich/seafile/` zahrnuté v restic backup cestách
+- Dump súbory: `/opt/stacks/backup/dumps/seafile-YYYY-MM-DD.sql` (rotate 7 dní)
 
 ## 10. Home Assistant integrácia
 
@@ -206,9 +274,11 @@ Max: Hagezi Multi PRO. **NIKDY** PRO++/Ultimate.
 - `/home/user/smart/` — Smart PWA zdrojový kód (bez `node_modules`)
 - `/home/user/.ssh/` — SSH kľúče (potrebné po restore pre prístup na Storage Box)
 - `/mnt/immich/library/` — Immich fotky/videá
+- `/mnt/immich/seafile/` — Seafile data (block storage)
 - `/var/lib/docker/volumes/smart_smart-data/_data` — Smart PWA dáta
 - `/var/lib/docker/volumes/docker_smart-data/_data` — Smart PWA SQLite DB
 - `pg_dump immich` → `/opt/stacks/backup/dumps/immich-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
+- `mysqldump seafile-db` → `/opt/stacks/backup/dumps/seafile-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
 - System config snapshot → `/opt/stacks/backup/dumps/sysconfig/` (DNS, Docker, crontab, UFW)
 
 NEZÁLOHUJ médiá (cez *arr re-downloadable).
