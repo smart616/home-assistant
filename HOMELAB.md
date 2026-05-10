@@ -100,7 +100,7 @@ Tailnet:
 5. **arr stack**: Gluetun + ProtonVPN WireGuard, qBit s `network_mode: "service:gluetun"`. Sonarr/Radarr/Prowlarr/Bazarr na default bridge. Konfig podľa TRaSH Guides.
 6. **Immich**: ak 4 GB → zakomentuj `immich-machine-learning`. Inak `MACHINE_LEARNING_MAX_BATCH_SIZE__FACIAL_RECOGNITION=1`, `concurrency=1`.
 7. **Monitoring**: Beszel + Homepage lokálne, Uptime Kuma na Hetzner CX11 VPS (Falkenstein).
-8. **Backup**: Restic → Hetzner Storage Box, nočný cron, štvrťročný restore test.
+8. **Backup** ✓: Restic → Hetzner Storage Box BX11 (`u591423.your-storagebox.de`), nočný cron 02:30, štvrťročný restore test.
 
 ## 7. Kritické gotchas
 
@@ -190,17 +190,29 @@ https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/fake.txt   
 ```
 Max: Hagezi Multi PRO. **NIKDY** PRO++/Ultimate.
 
-## 12. Backup targets
+## 12. Backup
 
-Zálohuj:
-- `/opt/stacks/`
-- Docker named volumes (one-shot tar container)
-- HA `/config`
-- Immich `UPLOAD_LOCATION` + nočný `pg_dump immich`
+**Provider:** Hetzner Storage Box BX11 — `u591423.your-storagebox.de:23` (SFTP, SSH key auth)
+**Tool:** Restic 0.16.4, repozitár ID `30d967857f`
+**Skript:** `/opt/stacks/backup/backup.sh`
+**Cron:** `30 2 * * *` (root crontab)
+**Log:** `/var/log/restic-backup.log`
+**Credentials:** `/opt/stacks/backup/.env` + `/opt/stacks/backup/.restic-password`
+
+### Čo sa zálohuje
+- `/opt/stacks/` — compose súbory + appdata
+- `/home/user/homeassistant/` — HA config, Z2M, Mosquitto, ESPHome (bez `.esphome` build cache)
+- `/mnt/immich/library/` — Immich fotky/videá
+- `/var/lib/docker/volumes/smart_smart-data/_data` — Smart PWA dáta
+- `pg_dump immich` → `/opt/stacks/backup/dumps/immich-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
 
 NEZÁLOHUJ médiá (cez *arr re-downloadable).
 
-Restore test: štvrťročne.
+### Retention
+7 denných / 4 týždenných / 6 mesačných snapshotov, automatický prune.
+
+### Restore test
+Štvrťročne — `restic restore latest --target /tmp/restore-test`
 
 ## 13. Pravidlá pre Claude Code
 
@@ -226,4 +238,4 @@ Cieľ: < 1 hodina migrácia.
 
 ---
 
-**Last updated**: 2026-05-08
+**Last updated**: 2026-05-10
