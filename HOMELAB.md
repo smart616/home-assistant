@@ -308,6 +308,18 @@ Návod: `/opt/stacks/backup/RESTORE.md` (zálohovaný spolu so stackom)
 - Agent sleduje `/mnt/immich` cez `EXTRA_FILESYSTEMS=/mnt/immich`
 - Beszel alerting **nepoužívame** — nahradený vlastným skriptom (viď nižšie)
 
+### Homepage sekcie a služby
+| Sekcia | Služba | URL |
+|---|---|---|
+| Home | Home Assistant | `http://smart-home-pc:8123` |
+| Smart Home | Zigbee2MQTT | `http://smart-home-pc:8080` |
+| Smart Home | ESPHome | `http://smart-home-pc:6052` |
+| Monitoring | Beszel | `http://smart-home-pc:8090` |
+| Monitoring | Dockge | `http://smart-home-pc:5001` |
+| Network | AdGuard Home | `http://smart-home-pc:3002` |
+| Media | Immich | `http://smart-home-pc:2283` |
+| Files | Seafile | `https://smart-home-pc.taile97bf5.ts.net` |
+
 ### Homepage disk widgety
 - `/` — hlavný disk
 - `/mnt/immich` — Immich SSD
