@@ -218,9 +218,13 @@ docker logs seafile -f
 
 ### Gotchas
 - `SERVICE_URL` + `FILE_SERVER_ROOT` sa nastavujú cez `SEAFILE_SERVER_HOSTNAME` pri prvom štarte — **nezmeniť neskôr bez re-init**.
-- Major upgrade (napr. 12 → 13): vždy Borg backup pred upgadom mimo bežnej rotácie.
+- Major upgrade (napr. 12 → 13): urobiť Restic backup pred upgadom mimo bežnej rotácie.
 - Admin heslo z `.env` platí **iba pri prvom štarte**. Neskôr meniť vo web UI.
 - iOS Files.app WebDAV: použiť **App Password** (vygenerovaný v Seafile web UI → Settings → App Password), nie hlavné heslo.
+- `.env` heslá: **nepoužívať `#`** (Docker Compose to číta ako komentár). Citovať hodnoty s `"`.
+- `JWT_PRIVATE_KEY` povinný v env od v12 — bez neho server nenaštartuje.
+- Pri zabudnutom hesle: `printf "email\nnewpass\nnewpass\n" | ./reset-admin.sh` v kontajneri (`/opt/seafile/seafile-server-latest/`).
+- Login attempt counter v Memcached — reset: `echo flush_all | nc localhost 11211` v `seafile-memcached` kontajneri.
 
 ### Operácie
 ```bash
