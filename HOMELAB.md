@@ -202,19 +202,24 @@ Reverse proxy pridať iba ak: smart TV bez TS klienta, path-based routing, publi
 ### Klienti
 | Klient | Konfigurácia |
 |---|---|
-| Windows (SeaDrive 3) | Server: `https://smart-home-pc.taile97bf5.ts.net`, drive letter S: |
 | iPhone (Seafile app) | Server: `https://smart-home-pc.taile97bf5.ts.net` — camera auto-upload |
 | iOS Files.app (WebDAV) | `https://smart-home-pc.taile97bf5.ts.net/seafdav` — App Password (nie hlavné heslo!) |
 | Web | `https://smart-home-pc.taile97bf5.ts.net` |
+| Windows (WebDAV) | Map network drive: `https://smart-home-pc.taile97bf5.ts.net/seafdav` — App Password |
+| Windows (SeaDrive 3) | Alternatíva — ale mountuje do `S:\My Libraries\`, nie flat root |
 
 ### Prvé spustenie
 ```bash
 cd /opt/stacks/seafile
-cp .env.example .env  # vyplniť silné heslá
+cp .env.example .env  # vyplniť silné heslá (bez # znakov!)
 docker compose up -d
 # Počkať ~60s na init DB a migrácie
 docker logs seafile -f
 ```
+
+**Po prvom štarte overiť** `/shared/seafile/conf/seahub_settings.py`:
+- `SERVICE_URL` a `FILE_SERVER_ROOT` musia byť `https://` — ak nie, opraviť a reštartovať.
+- Default admin email je `me@example.com` ak `SEAFILE_ADMIN_EMAIL` nebolo správne načítané — opraviť v DB: `UPDATE EmailUser SET email='...' WHERE email='me@example.com';` v `ccnet_db`.
 
 ### Gotchas
 - `SERVICE_URL` + `FILE_SERVER_ROOT` sa nastavujú cez `SEAFILE_SERVER_HOSTNAME` pri prvom štarte — **nezmeniť neskôr bez re-init**.
@@ -347,4 +352,4 @@ Cieľ: < 1 hodina migrácia.
 
 ---
 
-**Last updated**: 2026-05-10
+**Last updated**: 2026-05-10 (Seafile nasadený a funkčný)
