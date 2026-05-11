@@ -273,7 +273,7 @@ Max: Hagezi Multi PRO. **NIKDY** PRO++/Ultimate.
 **Provider:** Hetzner Storage Box BX11 — `u591423.your-storagebox.de:23` (SFTP, SSH key auth)
 **Tool:** Restic 0.16.4, repozitár ID `30d967857f`
 **Skript:** `/opt/stacks/backup/backup.sh`
-**Cron:** `30 2 * * *` (root crontab)
+**Cron:** `30 2 * * *` (root crontab) — lockfile `/var/lock/restic-backup.lock` (flock) bráni súbežným behom
 **Log:** `/var/log/restic-backup.log`
 **Credentials:** `/opt/stacks/backup/.env` + `/opt/stacks/backup/.restic-password`
 
@@ -288,7 +288,7 @@ Max: Hagezi Multi PRO. **NIKDY** PRO++/Ultimate.
 - `/var/lib/docker/volumes/smart_smart-data/_data` — Smart PWA dáta
 - `/var/lib/docker/volumes/docker_smart-data/_data` — Smart PWA SQLite DB
 - `pg_dump immich` → `/opt/stacks/backup/dumps/immich-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
-- `mysqldump seafile-db` → `/opt/stacks/backup/dumps/seafile-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
+- `mariadb-dump seafile-db` → `/opt/stacks/backup/dumps/seafile-YYYY-MM-DD.sql` (pred restic, rotate 7 dní)
 - System config snapshot → `/opt/stacks/backup/dumps/sysconfig/` (DNS, Docker, crontab, UFW)
 
 NEZÁLOHUJ médiá (cez *arr re-downloadable).
