@@ -1,0 +1,70 @@
+<svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .wall-ext { fill: none; stroke: #2c3e50; stroke-width: 8; stroke-linejoin: round; }
+      .wall-int { fill: none; stroke: #2c3e50; stroke-width: 3; stroke-linejoin: round; }
+      .room-fill { fill: #ecf0f1; }
+      .ext-fill  { fill: #dfe6e9; }
+      .label     { font-family: Arial, sans-serif; fill: #2c3e50; text-anchor: middle; dominant-baseline: middle; }
+      .label-lg  { font-size: 15px; font-weight: bold; }
+      .label-sm  { font-size: 11px; }
+      .door-arc  { fill: none; stroke: #7f8c8d; stroke-width: 1.5; stroke-dasharray: 4,2; }
+      .door-line { fill: none; stroke: #7f8c8d; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect width="920" height="420" fill="#f0f2f5"/>
+
+  <!-- Prístavby (terasy) -->
+  <rect x="0" y="120" width="84" height="180" class="ext-fill wall-ext"/>
+  <rect x="836" y="120" width="84" height="180" class="ext-fill wall-ext"/>
+
+  <!-- Hlavné telo domu -->
+  <rect x="84" y="40" width="752" height="340" class="room-fill wall-ext"/>
+
+  <!-- Spálňa: pravá stena -->
+  <line x1="300" y1="40" x2="300" y2="185" class="wall-int"/>
+  <!-- Spálňa: dolná stena -->
+  <line x1="84" y1="185" x2="300" y2="185" class="wall-int"/>
+
+  <!-- Chodba: dolná stena / kúpeľňa: horná stena -->
+  <line x1="84" y1="250" x2="210" y2="250" class="wall-int"/>
+  <!-- Kúpeľňa: pravá stena -->
+  <line x1="210" y1="185" x2="210" y2="380" class="wall-int"/>
+
+  <!-- Obývačka / technická zóna — vertikálna delenie -->
+  <line x1="490" y1="40" x2="490" y2="380" class="wall-int"/>
+  <!-- Obývačka / technická — horizontálne delenie -->
+  <line x1="210" y1="205" x2="490" y2="205" class="wall-int"/>
+
+  <!-- Technická / pravé izby — vertikálna stena -->
+  <line x1="680" y1="40" x2="680" y2="380" class="wall-int"/>
+
+  <!-- Pravé izby — horizontálne delenie -->
+  <line x1="680" y1="210" x2="836" y2="210" class="wall-int"/>
+
+  <!-- Priečky v technickej zóne -->
+  <line x1="490" y1="180" x2="680" y2="180" class="wall-int"/>
+
+  <!-- Dvere vchod (chodba, ľavá stena) -->
+  <line x1="84" y1="215" x2="84" y2="245" class="door-line"/>
+  <path d="M 84,215 A 30,30 0 0,1 114,215" class="door-arc"/>
+
+  <!-- Dvere terasa (obývačka, dolná stena) -->
+  <line x1="340" y1="380" x2="380" y2="380" class="door-line"/>
+  <path d="M 340,380 A 40,40 0 0,0 340,340" class="door-arc"/>
+
+  <!-- Popisky miestností -->
+  <text x="192" y="112" class="label label-lg">Spálňa</text>
+  <text x="147" y="212" class="label label-sm">Chodba</text>
+  <text x="147" y="226" class="label label-sm">/ Vchod</text>
+  <text x="147" y="320" class="label label-lg">Kúpeľňa</text>
+  <text x="350" y="300" class="label label-lg">Obývačka</text>
+  <text x="585" y="290" class="label label-lg">Technická</text>
+  <text x="585" y="308" class="label label-sm">miestnosť</text>
+  <text x="585" y="110" class="label label-sm">Chodba</text>
+  <text x="758" y="120" class="label label-lg">Izba</text>
+  <text x="758" y="310" class="label label-lg">Izba</text>
+  <text x="42" y="210" class="label label-sm" transform="rotate(-90,42,210)">Terasa</text>
+  <text x="878" y="210" class="label label-sm" transform="rotate(90,878,210)">Terasa</text>
+</svg>
