@@ -324,6 +324,13 @@ Návod: `/opt/stacks/backup/RESTORE.md` (zálohovaný spolu so stackom)
 - `/` — hlavný disk
 - `/mnt/immich` — Immich SSD
 
+### Homepage info widgety (hlavička)
+- **CPU + RAM + disk `/` + sieť** — `network: enxfce498e3f33d` (USB Ethernet adaptér)
+- **Immich SSD** — disk `/mnt/immich`
+- **Datum a čas** — `locale: sk-SK`, formát DD.MM.YYYY, 24h
+
+Config: `/home/user/stacks/monitoring/homepage/config/widgets.yaml`
+
 ### Health check skript
 **Skript:** `/opt/stacks/backup/check-health.sh`
 **Cron:** `0 * * * *` (každú hodinu, root crontab)
